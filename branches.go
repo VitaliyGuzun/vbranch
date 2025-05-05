@@ -103,7 +103,16 @@ func main() {
 		}
 	} else {
 		// Ветки нет локально, создаём её отслеживая origin
-		checkoutCmd := exec.Command("git", "checkout", "-b", localBranch, selected)
+		fetchCmd := exec.Command("git", "fetch", "origin", localBranch+":"+localBranch)
+		fetchCmd.Stdout = os.Stdout
+		fetchCmd.Stderr = os.Stderr
+		fetchError := fetchCmd.Run()
+
+		if fetchError != nil {
+			log.Fatalf("Ошибка создания ветки: %v", fetchError)
+		}
+
+		checkoutCmd := exec.Command("git", "checkout", localBranch)
 		checkoutCmd.Stdout = os.Stdout
 		checkoutCmd.Stderr = os.Stderr
 		checkoutError := checkoutCmd.Run()
