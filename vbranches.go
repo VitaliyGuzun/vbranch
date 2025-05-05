@@ -12,6 +12,17 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
+/*
+	TODO:
+	- разбить файл на маленькие файлы
+	- добавить тесты к каждой функции
+	- собрать свой пакет и опубликовать в него этот скрипт
+	- при выполнении скрипта, проверять что есть обновления и предлагать обновить
+	- добавить логи в каждую функцию, чтобы юзер видел что происходит
+	- локализовать
+	- запакопать в докер? не уверен что это нужно
+*/
+
 // Проверка, что мы в git-репозитории
 func isGitRepo() error {
 	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
@@ -19,6 +30,17 @@ func isGitRepo() error {
 
 	if err != nil || strings.TrimSpace(string(output)) != "true" {
 		return fmt.Errorf("not a git repository")
+	}
+
+	return nil
+}
+
+func fetchRemote() error {
+	command := exec.Command("git", "fetch")
+	_, error := command.Output()
+
+	if error != nil {
+		return error
 	}
 
 	return nil
@@ -59,10 +81,12 @@ func hasLocalBranch(branch string) bool {
 }
 
 func main() {
-	error := isGitRepo()
-
-	if error != nil {
+	if error := isGitRepo(); error != nil {
 		log.Fatalf("ERROR: %v", error)
+	}
+
+	if fetchAllError := fetchRemote(); fetchAllError != nil {
+		log.Fatalf("Fetch error: %v", fetchAllError)
 	}
 
 	branches, branchesError := getRemoteBranches()
