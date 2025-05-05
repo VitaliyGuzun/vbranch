@@ -102,13 +102,15 @@ func main() {
 			log.Fatalf("Ошибка checkout: %v", checkoutError)
 		}
 	} else {
-		//         // Ветки нет локально, создаём её отслеживая origin
-		//         checkoutCmd := exec.Command("git", "checkout", "-b", localBranch, selected)
-		//         checkoutCmd.Stdout = os.Stdout
-		//         checkoutCmd.Stderr = os.Stderr
-		//         if err := checkoutCmd.Run(); err != nil {
-		//             log.Fatalf("Ошибка создания ветки: %v", err)
-		//         }
+		// Ветки нет локально, создаём её отслеживая origin
+		checkoutCmd := exec.Command("git", "checkout", "-b", localBranch, selected)
+		checkoutCmd.Stdout = os.Stdout
+		checkoutCmd.Stderr = os.Stderr
+		checkoutError := checkoutCmd.Run()
+
+		if checkoutError != nil {
+			log.Fatalf("Ошибка создания ветки: %v", checkoutError)
+		}
 	}
 
 	log.Println("Все ок")
