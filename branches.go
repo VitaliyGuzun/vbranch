@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -49,6 +50,14 @@ func getRemoteBranches() ([]string, error) {
 	return branches, nil
 }
 
+// Проверка, есть ли локальная ветка
+func hasLocalBranch(branch string) bool {
+	cmd := exec.Command("git", "branch", "--list", branch)
+	output, _ := cmd.Output()
+
+	return strings.TrimSpace(string(output)) != ""
+}
+
 func main() {
 	error := isGitRepo()
 
@@ -78,6 +87,28 @@ func main() {
 
 	if branchError != nil {
 		log.Fatalf("Ошибка выбора: %v", branchError)
+	}
+
+	localBranch := strings.TrimPrefix(selected, "origin/")
+
+	if hasLocalBranch(localBranch) {
+		// Ветка уже есть локально
+		checkoutCmd := exec.Command("git", "checkout", localBranch)
+		checkoutCmd.Stdout = os.Stdout
+		checkoutCmd.Stderr = os.Stderr
+		checkoutError := checkoutCmd.Run()
+
+		if checkoutError != nil {
+			log.Fatalf("Ошибка checkout: %v", checkoutError)
+		}
+	} else {
+		//         // Ветки нет локально, создаём её отслеживая origin
+		//         checkoutCmd := exec.Command("git", "checkout", "-b", localBranch, selected)
+		//         checkoutCmd.Stdout = os.Stdout
+		//         checkoutCmd.Stderr = os.Stderr
+		//         if err := checkoutCmd.Run(); err != nil {
+		//             log.Fatalf("Ошибка создания ветки: %v", err)
+		//         }
 	}
 
 	log.Println("Все ок")
