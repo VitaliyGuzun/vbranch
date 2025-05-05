@@ -7,6 +7,8 @@ import (
 	"log"
 	"os/exec"
 	"strings"
+
+	"github.com/AlecAivazis/survey/v2"
 )
 
 // Проверка, что мы в git-репозитории
@@ -21,7 +23,7 @@ func isGitRepo() error {
 	return nil
 }
 
-// // Получение всех удалённых веток
+// Получение всех удалённых веток
 func getRemoteBranches() ([]string, error) {
 	cmd := exec.Command("git", "branch", "-r")
 	output, err := cmd.Output()
@@ -54,17 +56,29 @@ func main() {
 		log.Fatalf("ERROR: %v", error)
 	}
 
-	branches, err := getRemoteBranches()
+	branches, branchesError := getRemoteBranches()
 
-	if err != nil {
-		log.Fatalf("Ошибка получения веток: %v", err)
-	}
-
-	if len(branches) == 0 {
+	if branchesError != nil {
+		log.Fatalf("Ошибка получения веток: %v", branchesError)
+	} else if len(branches) == 0 {
 		log.Fatalf("Нет веток на origin")
 	}
 
 	fmt.Println(branches)
+
+	// 4. Выбор ветки
+	var selected string
+
+	prompt := &survey.Select{
+		Message: "Выбери ветку для переключения:",
+		Options: branches,
+	}
+
+	branchError := survey.AskOne(prompt, &selected)
+
+	if branchError != nil {
+		log.Fatalf("Ошибка выбора: %v", branchError)
+	}
 
 	log.Println("Все ок")
 }
