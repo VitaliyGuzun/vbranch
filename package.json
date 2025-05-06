@@ -1,0 +1,13 @@
+{
+  "name": "vbranch",
+  "version": "1.0.1",
+  "description": "Git branch switcher CLI",
+  "bin": {
+    "vbranch": "./vbranch-npm/runner.js"
+  },
+  "files": [
+    "vbranch"
+  ],
+  "author": "Vitaly Guzun",
+  "license": "MIT"
+}
