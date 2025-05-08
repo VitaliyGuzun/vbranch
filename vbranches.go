@@ -152,10 +152,6 @@ func main() {
 		log.Fatalf("ERROR: %v", error)
 	}
 
-	if fetchAllError := fetchRemote(); fetchAllError != nil {
-		log.Fatalf("Fetch error: %v", fetchAllError)
-	}
-
 	// Выбор действия
 	// fetch | remove
 	var action string
@@ -173,6 +169,10 @@ func main() {
 	}
 
 	if action == "fetch" {
+		if fetchAllError := fetchRemote(); fetchAllError != nil {
+			log.Fatalf("Fetch error: %v", fetchAllError)
+		}
+
 		branches, branchesError := getRemoteBranches()
 
 		if branchesError != nil {
