@@ -47,6 +47,10 @@ import (
 	## git branch -D origin/test origin/branch
 */
 
+var chooseActionLabel = "Choose action: "
+var chooseBranchLabel = "Choose a branch to change on: "
+var chooseBranchesToRemove = "Choose branches to remove: "
+
 // Проверка, что мы в git-репозитории
 func isGitRepo() error {
 	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
@@ -149,23 +153,22 @@ func hasLocalBranch(branch string) bool {
 
 func main() {
 	if error := isGitRepo(); error != nil {
-		log.Fatalf("ERROR: %v", error)
+		log.Fatal("Git is not inited", error)
 	}
 
-	// Выбор действия
-	// fetch | remove
+	// Choose action: fetch | remove
 	var action string
 	actions := []string{"fetch", "remove"}
 
 	actionsPrompt := &survey.Select{
-		Message: "Выберите действие:",
+		Message: chooseActionLabel,
 		Options: actions,
 	}
 
 	actionError := survey.AskOne(actionsPrompt, &action)
 
 	if actionError != nil {
-		log.Fatalf("Ошибка выбора действия: %v", actionError)
+		log.Fatalf(chooseActionLabel, actionError)
 	}
 
 	if action == "fetch" {
@@ -176,50 +179,50 @@ func main() {
 		branches, branchesError := getRemoteBranches()
 
 		if branchesError != nil {
-			log.Fatalf("Ошибка получения веток: %v", branchesError)
+			log.Fatal("Fetch remote branches:", branchesError)
 		} else if len(branches) == 0 {
-			log.Fatalf("Нет веток на origin")
+			log.Fatal("No branches on origin")
 		}
 
-		// 4. Выбор ветки
+		// Choose a branch
 		var selected string
 
 		prompt := &survey.Select{
-			Message: "Выберите ветку для переключения:",
+			Message: chooseBranchLabel,
 			Options: branches,
 		}
 
 		branchError := survey.AskOne(prompt, &selected)
 
 		if branchError != nil {
-			log.Fatalf("Ошибка выбора: %v", branchError)
+			log.Fatal(chooseBranchLabel, branchError)
 		}
 
 		localBranch := strings.TrimPrefix(selected, "origin/")
 
 		if hasLocalBranch(localBranch) {
-			// Ветка уже есть локально
+			// TODO
+			// If a branch exists already, ask
+			// "Try to refetch? (Remove && Fetch) || Rebase"
+
+			// Chosen branch exists already localy
 			checkoutCmd := exec.Command("git", "checkout", localBranch)
 			checkoutCmd.Stdout = os.Stdout
 			checkoutCmd.Stderr = os.Stderr
 			checkoutError := checkoutCmd.Run()
 
 			if checkoutError != nil {
-				log.Fatalf("Ошибка checkout: %v", checkoutError)
+				log.Fatal("Checkout error: ", checkoutError)
 			}
-
-			// TODO
-			// Удалить сначала
-			// Скачать заново и перейти на нее
 		} else {
-			// Ветки нет локально, создаём её отслеживая origin
+			// There is not such a branch, fetch and checkout
 			fetchCmd := exec.Command("git", "fetch", "origin", localBranch+":"+localBranch)
 			fetchCmd.Stdout = os.Stdout
 			fetchCmd.Stderr = os.Stderr
 			fetchError := fetchCmd.Run()
 
 			if fetchError != nil {
-				log.Fatalf("Ошибка создания ветки: %v", fetchError)
+				log.Fatal("Fetch branch error: ", fetchError)
 			}
 
 			checkoutCmd := exec.Command("git", "checkout", localBranch)
@@ -228,37 +231,33 @@ func main() {
 			checkoutError := checkoutCmd.Run()
 
 			if checkoutError != nil {
-				log.Fatalf("Ошибка создания ветки: %v", checkoutError)
+				log.Fatal("Checkout error: ", checkoutError)
 			}
 		}
 	} else if action == "remove" {
-		fmt.Println("REMOVE")
-
 		branches, branchesError := getLocalBranches()
 
 		if branchesError != nil {
-			log.Fatalf("Ошибка получения веток: %v", branchesError)
+			log.Fatal("Error for local branches: ", branchesError)
 		} else if len(branches) == 0 {
-			log.Fatalf("Нет веток на origin")
+			log.Fatalf("There are no local branches to remove")
 		}
 
 		selected := []string{}
 
 		branchesPrompt := &survey.MultiSelect{
-			Message: "Выберите ветки для удаления:",
+			Message: chooseBranchesToRemove,
 			Options: branches,
 		}
 
 		branchError := survey.AskOne(branchesPrompt, &selected)
 
 		if branchError != nil {
-			log.Fatalf("Ошибка выбора бранчей для удаления: %v", branchError)
+			log.Fatal(chooseBranchesToRemove, branchError)
 		}
 
 		fmt.Println(selected)
 
 		removeBranches(selected)
 	}
-
-	log.Println("Все ок")
 }

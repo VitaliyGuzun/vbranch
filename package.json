@@ -1,6 +1,6 @@
 {
   "name": "vbranch",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Git branch switcher CLI",
   "bin": {
     "vbranch": "./vbranch-npm/vbranch"
@@ -9,5 +9,8 @@
     "vbranch"
   ],
   "author": "Vitaly Guzun",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "build": "GOOS=darwin GOARCH=amd64 go build -ldflags=\"-s -w\" -o ./vbranch-npm/vbranch"
+  }
 }
