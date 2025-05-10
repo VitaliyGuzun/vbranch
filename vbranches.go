@@ -112,7 +112,12 @@ func main() {
 		if branchesError != nil {
 			log.Fatal("Error for local branches: ", branchesError)
 		} else if len(branches) == 0 {
-			log.Fatalf("There are no local branches to remove")
+			log.Fatal("There are no local branches to remove")
+		} else if len(branches) == 1 {
+			fmt.Println("🔴 Error:")
+			fmt.Printf("   You can't remove branch \"%v\" because there is no other branch to switch to.\n", branches[0])
+			fmt.Printf("   If you still want to remove \"%v\", create another branch before to switch to.\n", branches[0])
+			return
 		}
 
 		selected := []string{}
@@ -127,8 +132,6 @@ func main() {
 		if branchError != nil {
 			log.Fatal(chooseBranchesToRemove, branchError)
 		}
-
-		fmt.Println(selected)
 
 		utilities.RemoveBranches(selected)
 	}

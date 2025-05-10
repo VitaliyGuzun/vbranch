@@ -70,6 +70,7 @@ func GetLocalBranches() ([]string, error) {
 
 	for scanner.Scan() {
 		branch := strings.TrimSpace(scanner.Text())
+		branch = strings.Replace(branch, "* ", "", 1)
 
 		if strings.Contains(branch, "->") {
 			// Пропускаем алиасы типа origin/HEAD -> origin/main
@@ -85,7 +86,6 @@ func GetLocalBranches() ([]string, error) {
 // Удаление бранчей
 func RemoveBranches(branches []string) error {
 	args := append([]string{"branch", "-D"}, branches...)
-	fmt.Println("Removing branches:", branches)
 
 	command := exec.Command("git", args...)
 	command.Stdout = os.Stdout
