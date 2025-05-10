@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
+	"gh-api/utilities"
 	"log"
 	"os"
 	"os/exec"
@@ -16,143 +15,16 @@ import (
 	TODO:
 	- разбить файл на маленькие файлы
 	- добавить тесты к каждой функции
-	- собрать свой пакет и опубликовать в него этот скрипт
 	- при выполнении скрипта, проверять что есть обновления и предлагать обновить
 	- добавить логи в каждую функцию, чтобы юзер видел что происходит
-	- локализовать
-	- запакопать в докер? не уверен что это нужно
-
-	---------------
-	$ branch
-
-	$ ✅ fetch
-	$ remove
-
-	$ origin/main
-	$ ✅ origin/test
-	$ origin/branch
-
-	## git fetch origin origin/test:origin/test && git checkout origin/test
-
-	---------------
-	$ branch
-
-	$ fetch
-	$ ✅ remove
-
-	$ origin/main
-	$ ✅ origin/test
-	$ ✅ origin/branch
-
-	## git branch -D origin/test origin/branch
 */
 
 var chooseActionLabel = "Choose action: "
 var chooseBranchLabel = "Choose a branch to change on: "
 var chooseBranchesToRemove = "Choose branches to remove: "
 
-// Проверка, что мы в git-репозитории
-func isGitRepo() error {
-	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
-	output, err := cmd.Output()
-
-	if err != nil || strings.TrimSpace(string(output)) != "true" {
-		return fmt.Errorf("not a git repository")
-	}
-
-	return nil
-}
-
-func fetchRemote() error {
-	command := exec.Command("git", "fetch")
-	_, error := command.Output()
-
-	if error != nil {
-		return error
-	}
-
-	return nil
-}
-
-// Получение всех удалённых веток
-func getRemoteBranches() ([]string, error) {
-	cmd := exec.Command("git", "branch", "-r")
-	output, err := cmd.Output()
-
-	if err != nil {
-		return nil, err
-	}
-
-	branches := []string{}
-	scanner := bufio.NewScanner(bytes.NewReader(output))
-
-	for scanner.Scan() {
-		branch := strings.TrimSpace(scanner.Text())
-
-		if strings.Contains(branch, "->") {
-			// Пропускаем алиасы типа origin/HEAD -> origin/main
-			continue
-		}
-
-		branches = append(branches, branch)
-	}
-
-	return branches, nil
-}
-
-// Получение локальных веток
-func getLocalBranches() ([]string, error) {
-	command := exec.Command("git", "branch")
-	output, error := command.Output()
-
-	if error != nil {
-		return nil, error
-	}
-
-	branches := []string{}
-	scanner := bufio.NewScanner(bytes.NewReader(output))
-
-	for scanner.Scan() {
-		branch := strings.TrimSpace(scanner.Text())
-
-		if strings.Contains(branch, "->") {
-			// Пропускаем алиасы типа origin/HEAD -> origin/main
-			continue
-		}
-
-		branches = append(branches, branch)
-	}
-
-	return branches, nil
-}
-
-// Удаление бранчей
-func removeBranches(branches []string) error {
-	args := append([]string{"branch", "-D"}, branches...)
-	fmt.Println("Removing branches:", branches)
-
-	command := exec.Command("git", args...)
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-
-	removeError := command.Run()
-	if removeError != nil {
-		return removeError
-	}
-
-	return nil
-}
-
-// Проверка, есть ли локальная ветка
-func hasLocalBranch(branch string) bool {
-	cmd := exec.Command("git", "branch", "--list", branch)
-	output, _ := cmd.Output()
-
-	return strings.TrimSpace(string(output)) != ""
-}
-
 func main() {
-	if error := isGitRepo(); error != nil {
+	if error := utilities.IsGitRepo(); error != nil {
 		log.Fatal("Git is not inited", error)
 	}
 
@@ -172,11 +44,11 @@ func main() {
 	}
 
 	if action == "fetch" {
-		if fetchAllError := fetchRemote(); fetchAllError != nil {
+		if fetchAllError := utilities.FetchRemote(); fetchAllError != nil {
 			log.Fatalf("Fetch error: %v", fetchAllError)
 		}
 
-		branches, branchesError := getRemoteBranches()
+		branches, branchesError := utilities.GetRemoteBranches()
 
 		if branchesError != nil {
 			log.Fatal("Fetch remote branches:", branchesError)
@@ -200,7 +72,7 @@ func main() {
 
 		localBranch := strings.TrimPrefix(selected, "origin/")
 
-		if hasLocalBranch(localBranch) {
+		if utilities.HasLocalBranch(localBranch) {
 			// TODO
 			// If a branch exists already, ask
 			// "Try to refetch? (Remove && Fetch) || Rebase"
@@ -235,7 +107,7 @@ func main() {
 			}
 		}
 	} else if action == "remove" {
-		branches, branchesError := getLocalBranches()
+		branches, branchesError := utilities.GetLocalBranches()
 
 		if branchesError != nil {
 			log.Fatal("Error for local branches: ", branchesError)
@@ -258,6 +130,6 @@ func main() {
 
 		fmt.Println(selected)
 
-		removeBranches(selected)
+		utilities.RemoveBranches(selected)
 	}
 }
