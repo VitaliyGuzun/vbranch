@@ -13,7 +13,6 @@ import (
 
 /*
 	TODO:
-	- разбить файл на маленькие файлы
 	- добавить тесты к каждой функции
 	- при выполнении скрипта, проверять что есть обновления и предлагать обновить
 	- добавить логи в каждую функцию, чтобы юзер видел что происходит
@@ -107,7 +106,7 @@ func main() {
 			}
 		}
 	} else if action == "remove" {
-		branches, branchesError := utilities.GetLocalBranches()
+		branches, currentBranch, branchesError := utilities.GetLocalBranches()
 
 		if branchesError != nil {
 			log.Fatal("Error for local branches: ", branchesError)
@@ -120,19 +119,51 @@ func main() {
 			return
 		}
 
-		selected := []string{}
+		removeBranches := []string{}
 
 		branchesPrompt := &survey.MultiSelect{
 			Message: chooseBranchesToRemove,
 			Options: branches,
 		}
 
-		branchError := survey.AskOne(branchesPrompt, &selected)
+		branchError := survey.AskOne(branchesPrompt, &removeBranches)
 
 		if branchError != nil {
 			log.Fatal(chooseBranchesToRemove, branchError)
 		}
 
-		utilities.RemoveBranches(selected)
+		// If user selected the current branch for removing, we have to checkout to another branch
+		if utilities.ShouldChangeBranch(branches, currentBranch) {
+			var checkoutBranch string
+
+			// Go through all branches searching for a branch that is not in the branches to remove
+			for _, branch := range branches {
+				shouldSkip := false
+
+				for _, removeBranche := range removeBranches {
+					if removeBranche == branch {
+						shouldSkip = true
+						break
+					}
+				}
+
+				if !shouldSkip {
+					checkoutBranch = branch
+					break
+				}
+			}
+
+			// If there is a branch to checkout: do checkout before removing
+			if checkoutBranch != "" {
+				utilities.Checkout(checkoutBranch)
+			} else {
+				fmt.Println("🔴 Error:")
+				fmt.Printf("   Looks like you choose all branches to remove\n")
+				fmt.Printf("   You can't remove all branches. There must be at least one branch left.\n")
+				fmt.Printf("   Please, leave at least one branch not selected.\n")
+			}
+		}
+
+		utilities.RemoveBranches(removeBranches)
 	}
 }

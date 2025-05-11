@@ -57,12 +57,13 @@ func GetRemoteBranches() ([]string, error) {
 	return branches, nil
 }
 
-func GetLocalBranches() ([]string, error) {
+func GetLocalBranches() ([]string, string, error) {
 	command := exec.Command("git", "branch")
 	output, error := command.Output()
+	var currentBranch string
 
 	if error != nil {
-		return nil, error
+		return nil, "", error
 	}
 
 	branches := []string{}
@@ -70,17 +71,21 @@ func GetLocalBranches() ([]string, error) {
 
 	for scanner.Scan() {
 		branch := strings.TrimSpace(scanner.Text())
-		branch = strings.Replace(branch, "* ", "", 1)
 
+		if strings.Contains(branch, "* ") {
+			branch = strings.Replace(branch, "* ", "", 1)
+			currentBranch = branch
+		}
+
+		// Skip aliaces origin/HEAD -> origin/main
 		if strings.Contains(branch, "->") {
-			// Пропускаем алиасы типа origin/HEAD -> origin/main
 			continue
 		}
 
 		branches = append(branches, branch)
 	}
 
-	return branches, nil
+	return branches, currentBranch, nil
 }
 
 // Удаление бранчей
@@ -105,4 +110,27 @@ func HasLocalBranch(branch string) bool {
 	output, _ := cmd.Output()
 
 	return strings.TrimSpace(string(output)) != ""
+}
+
+func ShouldChangeBranch(branches []string, branch string) bool {
+	for _, element := range branches {
+		if element == branch {
+			return true
+		}
+	}
+
+	return false
+}
+
+func Checkout(branch string) {
+	checkoutCommand := exec.Command("git", "checkout", branch)
+	checkoutCommand.Stdout = os.Stdout
+	checkoutCommand.Stderr = os.Stderr
+
+	checkoutError := checkoutCommand.Run()
+
+	if checkoutError != nil {
+		fmt.Println("🔴 Error:")
+		fmt.Println(checkoutError)
+	}
 }
