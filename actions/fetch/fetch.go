@@ -2,16 +2,22 @@ package fetch
 
 import (
 	"gh-api/actions/ask"
+	"gh-api/actions/command"
 	"gh-api/utilities"
 	"log"
-	"os"
-	"os/exec"
 	"strings"
 )
 
 var chooseBranchLabel = "Choose a branch to change on: "
 
 func Run() {
+	// prune remote branches locally
+	err := command.Run("git", "remote", "prune", "origin")
+
+	if err != nil {
+		log.Fatalf("Prune error: %v", err)
+	}
+
 	if err := utilities.FetchRemote(); err != nil {
 		log.Fatalf("Fetch error: %v", err)
 	}
@@ -39,33 +45,23 @@ func Run() {
 		// "Try to refetch? (Remove && Fetch) || Rebase"
 
 		// Chosen branch exists already localy
-		err := Command("git", "checkout", localBranch)
+		err := command.Run("git", "checkout", localBranch)
 
 		if err != nil {
 			log.Fatal("Checkout error: ", err)
 		}
 	} else {
 		// There is not such a branch, fetch and checkout
-		err := Command("git", "fetch", "origin", localBranch+":"+localBranch)
+		err := command.Run("git", "fetch", "origin", localBranch+":"+localBranch)
 
 		if err != nil {
 			log.Fatal("Fetch branch error: ", err)
 		}
 
-		err1 := Command("git", "checkout", localBranch)
+		err1 := command.Run("git", "checkout", localBranch)
 
 		if err1 != nil {
 			log.Fatal("Checkout error: ", err1)
 		}
 	}
-}
-
-func Command(arg ...string) error {
-	command := exec.Command(arg[0], arg[1:]...)
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-
-	err := command.Run()
-
-	return err
 }
