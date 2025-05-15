@@ -18,7 +18,8 @@ func Run() {
 		log.Fatal("There are no local branches to remove")
 	} else if len(branches) == 1 {
 		fmt.Println("🔴 Error:")
-		fmt.Printf("   You can't remove branch \"%v\" because there is no other branch to switch to.\n", branches[0])
+		fmt.Printf("   You the only branch you have is \"%v\".\n", branches[0])
+		fmt.Println("   You can't remove it because there is no other branch to switch to.")
 		fmt.Printf("   If you still want to remove \"%v\", create another branch before to switch to.\n", branches[0])
 		return
 	}

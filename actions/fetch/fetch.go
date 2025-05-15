@@ -9,6 +9,7 @@ import (
 )
 
 var chooseBranchLabel = "Choose a branch to change on: "
+var backLabel = "< back"
 
 func Run() {
 	// prune remote branches locally
@@ -23,6 +24,7 @@ func Run() {
 	}
 
 	remoteBranches, err := utilities.GetRemoteBranches()
+	remoteBranches = append(remoteBranches, backLabel)
 
 	if err != nil {
 		log.Fatal("Fetch remote branches:", err)
@@ -32,6 +34,10 @@ func Run() {
 
 	// Choose a branch
 	remoteBranch, err := ask.One(&remoteBranches, &chooseBranchLabel)
+
+	if remoteBranch == backLabel {
+		return
+	}
 
 	if err != nil {
 		log.Fatal(chooseBranchLabel, err)
