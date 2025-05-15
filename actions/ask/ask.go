@@ -1,6 +1,10 @@
 package ask
 
-import "github.com/AlecAivazis/survey/v2"
+import (
+	"gh-api/actions/shared"
+
+	"github.com/AlecAivazis/survey/v2"
+)
 
 func One(options *[]string, label *string) (string, error) {
 	var value string
@@ -31,6 +35,34 @@ func Many(options *[]string, label *string) ([]string, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	return value, nil
+}
+
+func OneMultiline() {
+	text := ""
+	prompt := &survey.Multiline{
+		Message: "ping\nHello",
+	}
+	survey.AskOne(prompt, &text)
+}
+
+func OneWithDescription(options *[]string, label *string, meta []shared.PullRequest) (string, error) {
+	var value string
+
+	actionsPrompt := &survey.Select{
+		Message: *label,
+		Options: *options,
+		Description: func(value string, index int) string {
+			return meta[index].Author.Login
+		},
+	}
+
+	err := survey.AskOne(actionsPrompt, &value)
+
+	if err != nil {
+		return "", err
 	}
 
 	return value, nil
