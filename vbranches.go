@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"gh-api/actions/ask"
 	"gh-api/actions/fetch"
 	fetchpullrequest "gh-api/actions/fetch-pull-request"
@@ -29,17 +30,24 @@ func main() {
 	}
 
 	actions := []string{FETCH_BRANCH, FETCH_PULL_REQUEST, REMOVE_BRANCH}
-	action, err := ask.One(&actions, &chooseActionLabel)
 
-	if err != nil {
-		log.Fatal(chooseActionLabel, err)
-	}
+	for {
+		action, err := ask.One(&actions, &chooseActionLabel)
 
-	if action == FETCH_BRANCH {
-		fetch.Run()
-	} else if action == FETCH_PULL_REQUEST {
-		fetchpullrequest.Run()
-	} else if action == REMOVE_BRANCH {
-		remove.Run()
+		if err != nil {
+			log.Fatal(chooseActionLabel, err)
+		}
+
+		if action == FETCH_BRANCH {
+			fetch.Run()
+		} else if action == FETCH_PULL_REQUEST {
+			fetchpullrequest.Run()
+		} else if action == REMOVE_BRANCH {
+			remove.Run()
+		}
+
+		fmt.Println()
+		fmt.Println()
+		action = ""
 	}
 }
