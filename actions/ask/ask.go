@@ -23,12 +23,19 @@ func One(options *[]string, label *string) (string, error) {
 	return value, nil
 }
 
-func Many(options *[]string, label *string) ([]string, error) {
+func Many(options *[]string, label *string, comparator *string, desc string) ([]string, error) {
 	var value []string
 
 	actionsPrompt := &survey.MultiSelect{
 		Message: *label,
 		Options: *options,
+		Description: func(value string, index int) string {
+			if value == *comparator {
+				return desc
+			}
+
+			return ""
+		},
 	}
 
 	err := survey.AskOne(actionsPrompt, &value)
@@ -55,6 +62,10 @@ func OneWithDescription(options *[]string, label *string, meta []shared.PullRequ
 		Message: *label,
 		Options: *options,
 		Description: func(value string, index int) string {
+			if value == "< back" {
+				return ""
+			}
+
 			return "by " + meta[index].Author.Login + ", branch: " + meta[index].Branch
 		},
 	}

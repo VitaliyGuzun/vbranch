@@ -1,4 +1,4 @@
-package fetchpullrequest
+package pullrequest
 
 import (
 	"encoding/json"
@@ -12,6 +12,7 @@ import (
 )
 
 var label = "Choose pull request to fetch and checkout: "
+var backLabel = "< back"
 
 func Run() {
 	cmd := exec.Command("gh", "pr", "list", "--state", "open", "--json", "number,title,state,url,author,headRefName")
@@ -34,10 +35,24 @@ func Run() {
 		ids[i] = strconv.Itoa(item.Number)
 	}
 
+	if len(ids) == 0 {
+		fmt.Println("\n---------------")
+		fmt.Println("There are no pull requests to fetch.")
+		fmt.Println("---------------")
+		return
+	}
+
+	ids = append(ids, backLabel)
+	prs = append(prs, shared.PullRequest{})
+
 	pullRequest, err := ask.OneWithDescription(&ids, &label, prs)
 
 	if err != nil {
 		log.Fatal(label, err)
+	}
+
+	if pullRequest == backLabel {
+		return
 	}
 
 	err = command.Run("gh", "pr", "checkout", pullRequest)
