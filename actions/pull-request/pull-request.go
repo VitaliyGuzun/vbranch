@@ -1,4 +1,4 @@
-package fetchpullrequest
+package pullrequest
 
 import (
 	"encoding/json"
@@ -32,6 +32,13 @@ func Run() {
 
 	for i, item := range prs {
 		ids[i] = strconv.Itoa(item.Number)
+	}
+
+	if len(ids) == 0 {
+		fmt.Println("\n---------------")
+		fmt.Println("There are no pull requests to fetch.")
+		fmt.Println("---------------")
+		return
 	}
 
 	pullRequest, err := ask.OneWithDescription(&ids, &label, prs)
