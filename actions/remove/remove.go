@@ -31,7 +31,7 @@ func Run() {
 	}
 
 	// If user selected the current branch for removing, we have to checkout to another branch
-	if utilities.ShouldChangeBranch(branches, currentBranch) {
+	if utilities.ShouldChangeBranch(removeBranches, currentBranch) {
 		var checkoutBranch string
 
 		// Go through all branches searching for a branch that is not in the branches to remove

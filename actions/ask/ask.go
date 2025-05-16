@@ -55,7 +55,7 @@ func OneWithDescription(options *[]string, label *string, meta []shared.PullRequ
 		Message: *label,
 		Options: *options,
 		Description: func(value string, index int) string {
-			return meta[index].Author.Login
+			return "by " + meta[index].Author.Login + ", branch: " + meta[index].Branch
 		},
 	}
 
