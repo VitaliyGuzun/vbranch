@@ -7,6 +7,7 @@ import (
 )
 
 // Hello
+// hello2
 
 func One(options *[]string, label *string) (string, error) {
 	var value string
