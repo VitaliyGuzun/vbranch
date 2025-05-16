@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 )
 
@@ -112,9 +113,9 @@ func HasLocalBranch(branch string) bool {
 	return strings.TrimSpace(string(output)) != ""
 }
 
-func ShouldChangeBranch(branches []string, branch string) bool {
-	for _, element := range branches {
-		if element == branch {
+func Contains(array []string, element string) bool {
+	for _, current := range array {
+		if current == element {
 			return true
 		}
 	}
@@ -133,4 +134,36 @@ func Checkout(branch string) {
 		fmt.Println("🔴 Error:")
 		fmt.Println(checkoutError)
 	}
+}
+
+// Case: The current branch was selected to be removed
+// We want to find another branch to checkout to be able to remove the current branch
+// Search for an element that:
+// exists in the first array and does not exist in the second
+
+var mainBranch = "main"
+var masterBranch = "master"
+
+func GetCheckoutBranch(array *[]string, array2 *[]string) string {
+	var branchesForCheckout []string
+
+	for _, branch := range *array {
+		if !slices.Contains(*array2, branch) {
+			branchesForCheckout = append(branchesForCheckout, branch)
+		}
+	}
+
+	// If "main" or "master" branches are available for checkout
+	// Try to return them first
+	for _, branch := range branchesForCheckout {
+		if branch == mainBranch || branch == masterBranch {
+			return branch
+		}
+	}
+
+	if len(branchesForCheckout) == 0 {
+		return ""
+	}
+
+	return branchesForCheckout[0]
 }
