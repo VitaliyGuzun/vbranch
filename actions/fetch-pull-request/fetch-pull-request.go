@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-var choosePullRequestLabel = "Choose pull request to fetch and checkout: "
+var label = "Choose pull request to fetch and checkout: "
 
 func Run() {
 	cmd := exec.Command("gh", "pr", "list", "--state", "open", "--json", "number,title,state,url,author,headRefName")
@@ -21,29 +21,25 @@ func Run() {
 		log.Fatal("Fetch pull requests: ", err)
 	}
 
-	var pullRequests []shared.PullRequest
+	var prs []shared.PullRequest
 
-	if err := json.Unmarshal(output, &pullRequests); err != nil {
+	if err := json.Unmarshal(output, &prs); err != nil {
 		fmt.Println("JSON parse error:", err)
 		return
 	}
 
-	fmt.Println("pullRequests: ", pullRequests)
+	ids := make([]string, len(prs))
 
-	pullRequestTitle := make([]string, len(pullRequests))
-
-	for i, item := range pullRequests {
-		pullRequestTitle[i] = strconv.Itoa(item.Number)
+	for i, item := range prs {
+		ids[i] = strconv.Itoa(item.Number)
 	}
 
-	pullRequest, err := ask.OneWithDescription(&pullRequestTitle, &choosePullRequestLabel, pullRequests)
+	pullRequest, err := ask.OneWithDescription(&ids, &label, prs)
 
 	if err != nil {
-		log.Fatal(choosePullRequestLabel, err)
+		log.Fatal(label, err)
 	}
 
-	// Здесь надо подставлять не title а номер бранча
-	// There is not such a branch, fetch and checkout
 	err = command.Run("gh", "pr", "checkout", pullRequest)
 
 	if err != nil {
