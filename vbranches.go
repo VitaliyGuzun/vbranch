@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"gh-api/actions/ask"
-	"gh-api/actions/fetch"
-	fetchpullrequest "gh-api/actions/fetch-pull-request"
+	"gh-api/actions/branch"
+	pullrequest "gh-api/actions/pull-request"
 	"gh-api/actions/remove"
 	"gh-api/utilities"
 	"log"
@@ -19,9 +19,9 @@ TODO:
 - добавить логи в каждую функцию, чтобы юзер видел что происходит
 */
 
-var chooseActionLabel = "Choose action: "
-var FETCH_BRANCH = "fetch branch"
-var FETCH_PULL_REQUEST = "fetch pull request"
+var chooseActionLabel = "Choose action:"
+var BRANCH = "branch"
+var PULL_REQUEST = "pull request"
 var REMOVE_BRANCH = "remove branch"
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 		log.Fatal("Git is not inited", error)
 	}
 
-	actions := []string{FETCH_BRANCH, FETCH_PULL_REQUEST, REMOVE_BRANCH}
+	actions := []string{BRANCH, PULL_REQUEST, REMOVE_BRANCH}
 
 	for {
 		action, err := ask.One(&actions, &chooseActionLabel)
@@ -38,15 +38,14 @@ func main() {
 			log.Fatal(chooseActionLabel, err)
 		}
 
-		if action == FETCH_BRANCH {
-			fetch.Run()
-		} else if action == FETCH_PULL_REQUEST {
-			fetchpullrequest.Run()
+		if action == BRANCH {
+			branch.Run()
+		} else if action == PULL_REQUEST {
+			pullrequest.Run()
 		} else if action == REMOVE_BRANCH {
 			remove.Run()
 		}
 
-		fmt.Println()
 		fmt.Println()
 		action = ""
 	}

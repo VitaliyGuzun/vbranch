@@ -1,4 +1,4 @@
-package fetchpullrequest
+package pullrequest
 
 import (
 	"encoding/json"
