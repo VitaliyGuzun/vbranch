@@ -29,6 +29,21 @@ func FetchRemote() error {
 		return error
 	}
 
+	fmt.Println("\n---------------")
+	fmt.Println("Remote links are updated.")
+	fmt.Println("---------------")
+
+	return nil
+}
+
+func Prune() error {
+	command := exec.Command("git", "fetch")
+	_, error := command.Output()
+
+	if error != nil {
+		return error
+	}
+
 	return nil
 }
 
@@ -97,9 +112,10 @@ func RemoveBranches(branches []string) error {
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 
-	removeError := command.Run()
-	if removeError != nil {
-		return removeError
+	err := command.Run()
+
+	if err != nil {
+		return err
 	}
 
 	return nil

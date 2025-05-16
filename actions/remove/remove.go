@@ -17,14 +17,24 @@ func Run() {
 	} else if len(branches) == 0 {
 		log.Fatal("There are no local branches to remove")
 	} else if len(branches) == 1 {
+		fmt.Println()
+		fmt.Println("---------------")
 		fmt.Println("🔴 Error:")
 		fmt.Printf("   The only branch you have is \"%v\".\n", branches[0])
 		fmt.Println("   You can't remove it because there is no other branch to switch to.")
 		fmt.Printf("   If you still want to remove \"%v\", create another branch before to switch to.\n", branches[0])
+		fmt.Println("---------------")
 		return
 	}
 
-	removeBranches, err := ask.Many(&branches, &chooseBranchesToRemove)
+	removeBranches, err := ask.Many(&branches, &chooseBranchesToRemove, &currentBranch, "current")
+
+	if len(removeBranches) == 0 {
+		fmt.Println("\n---------------")
+		fmt.Println("There are no branches selected to remove.")
+		fmt.Println("---------------")
+		return
+	}
 
 	if err != nil {
 		log.Fatal(chooseBranchesToRemove, err)
@@ -36,8 +46,6 @@ func Run() {
 	if shouldChangeBranch {
 		// Go through all branches searching for a branch that is not in the branches to remove
 		checkoutBranch := utilities.GetCheckoutBranch(&branches, &removeBranches)
-
-		fmt.Println("checkoutBranch: ", checkoutBranch)
 
 		// If there is a branch to checkout: do checkout before removing
 		if checkoutBranch != "" {
