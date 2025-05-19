@@ -11,13 +11,11 @@ import (
 	"log"
 )
 
+var version = "1.0.19"
+
 /*
 TODO:
-- залупить экшены. После выполнения команды, надо возвращаться обратно к списку команд
-- возвращать после удаления на main / master
 - добавить тесты к каждой функции
-- при выполнении скрипта, проверять что есть обновления и предлагать обновить
-- добавить логи в каждую функцию, чтобы юзер видел что происходит
 */
 
 var chooseActionLabel = "Choose action:"
@@ -34,6 +32,8 @@ func main() {
 	actions := []string{BRANCH, PULL_REQUEST, REMOVE_BRANCH, FETCH_REMOTE}
 
 	for {
+		fmt.Printf("v.%v\n", version)
+
 		action, err := ask.One(&actions, &chooseActionLabel)
 
 		if err != nil {
