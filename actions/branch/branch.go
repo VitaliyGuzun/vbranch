@@ -27,9 +27,13 @@ func Run() {
 	// There is not such a branch, fetch and checkout
 	if !utilities.HasLocalBranch(localBranch) {
 		command.Run("git", "fetch", "origin", localBranch+":"+localBranch)
+		fmt.Println("\n---------------")
+		command.Run("git", "checkout", localBranch)
+		fmt.Println("---------------")
+	} else {
+		fmt.Println("\n---------------")
+		command.Run("git", "checkout", localBranch)
+		command.Run("git", "pull", "--rebase", "origin", localBranch)
+		fmt.Println("\n---------------")
 	}
-
-	fmt.Println("\n---------------")
-	command.Run("git", "checkout", localBranch)
-	fmt.Println("---------------")
 }
