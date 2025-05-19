@@ -11,13 +11,12 @@ import (
 	"log"
 )
 
-var version = "1.0.19"
-
 /*
 TODO:
 - добавить тесты к каждой функции
 */
 
+var version = "1.0.20"
 var chooseActionLabel = "Choose action:"
 var BRANCH = "branch"
 var PULL_REQUEST = "pull request"
@@ -29,11 +28,11 @@ func main() {
 		log.Fatal("Git is not inited", error)
 	}
 
+	fmt.Printf("v.%v\n\n", version)
+
 	actions := []string{BRANCH, PULL_REQUEST, REMOVE_BRANCH, FETCH_REMOTE}
 
 	for {
-		fmt.Printf("v.%v\n", version)
-
 		action, err := ask.One(&actions, &chooseActionLabel)
 
 		if err != nil {
