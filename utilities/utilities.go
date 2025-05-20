@@ -47,9 +47,21 @@ func Prune() error {
 	return nil
 }
 
-// Получение всех удалённых веток
-func GetRemoteBranches() ([]string, error) {
-	cmd := exec.Command("git", "branch", "-r")
+type BranchLocation string
+
+const (
+	Local  BranchLocation = "local"
+	Remote BranchLocation = "remote"
+)
+
+func GetBranches(location string) ([]string, error) {
+	var cmd *exec.Cmd
+	if location == "local" {
+		cmd = exec.Command("git", "branch")
+	} else if location == "remote" {
+		cmd = exec.Command("git", "branch", "-r")
+	}
+
 	output, err := cmd.Output()
 
 	if err != nil {

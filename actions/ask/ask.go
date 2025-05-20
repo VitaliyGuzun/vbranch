@@ -55,7 +55,31 @@ func OneMultiline() {
 	survey.AskOne(prompt, &text)
 }
 
-func OneWithDescription(options *[]string, label *string, meta []shared.PullRequest) (string, error) {
+func ChooseBranch(options *[]string, label *string, current string) (string, error) {
+	var value string
+
+	actionsPrompt := &survey.Select{
+		Message: *label,
+		Options: *options,
+		Description: func(value string, index int) string {
+			if value == current {
+				return "current"
+			}
+
+			return ""
+		},
+	}
+
+	err := survey.AskOne(actionsPrompt, &value)
+
+	if err != nil {
+		return "", err
+	}
+
+	return value, nil
+}
+
+func ChoosePullRequest(options *[]string, label *string, meta []shared.PullRequest) (string, error) {
 	var value string
 
 	actionsPrompt := &survey.Select{

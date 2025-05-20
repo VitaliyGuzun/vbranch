@@ -12,11 +12,15 @@ var chooseBranchLabel = "Choose a branch to change on: "
 var backLabel = "< back"
 
 func Run() {
-	remoteBranches, _ := utilities.GetRemoteBranches()
+	localBranches, currentBranch, _ := utilities.GetLocalBranches()
+
+	remoteBranches, _ := utilities.GetBranches(string(utilities.Remote))
 	remoteBranches = append(remoteBranches, backLabel)
 
+	allBranches := append(localBranches, remoteBranches...)
+
 	// Choose a branch
-	remoteBranch, _ := ask.One(&remoteBranches, &chooseBranchLabel)
+	remoteBranch, _ := ask.ChooseBranch(&allBranches, &chooseBranchLabel, currentBranch)
 
 	if remoteBranch == backLabel {
 		return

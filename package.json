@@ -1,6 +1,6 @@
 {
   "name": "vbranch",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "Git branch switcher CLI",
   "bin": {
     "vbranch": "./vbranch-npm/vbranch"

@@ -45,7 +45,7 @@ func Run() {
 	ids = append(ids, backLabel)
 	prs = append(prs, shared.PullRequest{})
 
-	pullRequest, err := ask.OneWithDescription(&ids, &label, prs)
+	pullRequest, err := ask.ChoosePullRequest(&ids, &label, prs)
 
 	if err != nil {
 		log.Fatal(label, err)
