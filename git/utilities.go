@@ -173,3 +173,15 @@ func GetCheckoutBranch(array *[]string, array2 *[]string) string {
 
 	return branchesForCheckout[0]
 }
+
+func CreateBranchAndCheckout(branch string) {
+	cmd := exec.Command("git", "checkout", "-b", branch)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+
+	if err != nil {
+		fmt.Println("🔴 Error:")
+		fmt.Println(err)
+	}
+}

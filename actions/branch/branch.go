@@ -9,35 +9,45 @@ import (
 )
 
 var chooseBranchLabel = "Choose a branch to change on: "
+var createLabel = "CREATE NEW BRANCH"
 var backLabel = "< back"
 
 func Run() {
 	localBranches, currentBranch, _ := git.GetLocalBranches()
 
 	remoteBranches, _ := git.GetBranches(string(git.Remote))
-	remoteBranches = append(remoteBranches, backLabel)
 
-	allBranches := append(localBranches, remoteBranches...)
+	options := append([]string{createLabel}, localBranches...)
+	options = append(options, remoteBranches...)
+	options = append(options, backLabel)
 
 	// Choose a branch
-	remoteBranch, _ := ask.ChooseBranch(&allBranches, &chooseBranchLabel, currentBranch)
+	answer, _ := ask.ChooseBranch(&options, &chooseBranchLabel, currentBranch)
 
-	if remoteBranch == backLabel {
+	if answer == createLabel {
+		var branch string
+		fmt.Print("Type a name for a new branch: ")
+		fmt.Scan(&branch)
+		git.CreateBranchAndCheckout(branch)
 		return
 	}
 
-	localBranch := strings.TrimPrefix(remoteBranch, "origin/")
+	if answer == backLabel {
+		return
+	}
+
+	branch := strings.TrimPrefix(answer, "origin/")
 
 	// There is not such a branch, fetch and checkout
-	if !git.HasLocalBranch(localBranch) {
-		command.Run("git", "fetch", "origin", localBranch+":"+localBranch)
+	if !git.HasLocalBranch(branch) {
+		command.Run("git", "fetch", "origin", branch+":"+branch)
 		fmt.Println("\n---------------")
-		command.Run("git", "checkout", localBranch)
+		command.Run("git", "checkout", branch)
 		fmt.Println("---------------")
 	} else {
 		fmt.Println("\n---------------")
-		command.Run("git", "checkout", localBranch)
-		command.Run("git", "pull", "--rebase", "origin", localBranch)
+		command.Run("git", "checkout", branch)
+		command.Run("git", "pull", "--rebase", "origin", branch)
 		fmt.Println("\n---------------")
 	}
 }

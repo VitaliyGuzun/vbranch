@@ -11,12 +11,7 @@ import (
 	"log"
 )
 
-/*
-TODO:
-- добавить тесты к каждой функции
-*/
-
-var version = "1.0.21"
+var version = "1.0.22"
 var BRANCH = "branch"
 var PULL_REQUEST = "pull request"
 var REMOVE_BRANCH = "remove branch"
