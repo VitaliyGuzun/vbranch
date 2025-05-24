@@ -3,14 +3,14 @@ package remove
 import (
 	"fmt"
 	"gh-api/actions/ask"
-	"gh-api/utilities"
+	"gh-api/git"
 	"log"
 )
 
 var chooseBranchesToRemove = "Choose branches to remove: "
 
 func Run() {
-	branches, currentBranch, err := utilities.GetLocalBranches()
+	branches, currentBranch, err := git.GetLocalBranches()
 
 	if err != nil {
 		log.Fatal("Error for local branches: ", err)
@@ -40,16 +40,16 @@ func Run() {
 		log.Fatal(chooseBranchesToRemove, err)
 	}
 
-	shouldChangeBranch := utilities.Contains(removeBranches, currentBranch)
+	shouldChangeBranch := git.Contains(removeBranches, currentBranch)
 
 	// If user selected the current branch for removing, we have to checkout to another branch
 	if shouldChangeBranch {
 		// Go through all branches searching for a branch that is not in the branches to remove
-		checkoutBranch := utilities.GetCheckoutBranch(&branches, &removeBranches)
+		checkoutBranch := git.GetCheckoutBranch(&branches, &removeBranches)
 
 		// If there is a branch to checkout: do checkout before removing
 		if checkoutBranch != "" {
-			utilities.Checkout(checkoutBranch)
+			git.Checkout(checkoutBranch)
 		} else {
 			fmt.Println("🔴 Error:")
 			fmt.Printf("   Looks like you choose all branches to remove\n")
@@ -58,5 +58,5 @@ func Run() {
 		}
 	}
 
-	utilities.RemoveBranches(removeBranches)
+	git.RemoveBranches(removeBranches)
 }

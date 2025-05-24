@@ -1,4 +1,4 @@
-package utilities
+package git
 
 import (
 	"bufio"
@@ -9,17 +9,6 @@ import (
 	"slices"
 	"strings"
 )
-
-func IsGitRepo() error {
-	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
-	output, err := cmd.Output()
-
-	if err != nil || strings.TrimSpace(string(output)) != "true" {
-		return fmt.Errorf("not a git repository")
-	}
-
-	return nil
-}
 
 func FetchRemote() error {
 	command := exec.Command("git", "fetch")
@@ -32,17 +21,6 @@ func FetchRemote() error {
 	fmt.Println("\n---------------")
 	fmt.Println("Remote links are updated.")
 	fmt.Println("---------------")
-
-	return nil
-}
-
-func Prune() error {
-	command := exec.Command("git", "fetch")
-	_, error := command.Output()
-
-	if error != nil {
-		return error
-	}
 
 	return nil
 }

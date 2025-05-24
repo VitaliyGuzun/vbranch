@@ -6,11 +6,11 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-func One(options *[]string, label *string) (string, error) {
+func One(options *[]string, label string) (string, error) {
 	var value string
 
 	actionsPrompt := &survey.Select{
-		Message: *label,
+		Message: label,
 		Options: *options,
 	}
 

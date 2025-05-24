@@ -7,7 +7,7 @@ import (
 	"gh-api/actions/command"
 	pullrequest "gh-api/actions/pull-request"
 	"gh-api/actions/remove"
-	"gh-api/utilities"
+	"gh-api/git"
 	"log"
 )
 
@@ -17,26 +17,27 @@ TODO:
 */
 
 var version = "1.0.21"
-var chooseActionLabel = "Choose action:"
 var BRANCH = "branch"
 var PULL_REQUEST = "pull request"
 var REMOVE_BRANCH = "remove branch"
 var FETCH_REMOTE = "fetch remote"
 
-func main() {
-	if error := utilities.IsGitRepo(); error != nil {
-		log.Fatal("Git is not inited", error)
-	}
+var actions = []string{BRANCH, PULL_REQUEST, REMOVE_BRANCH, FETCH_REMOTE}
 
+func main() {
 	fmt.Printf("v.%v\n\n", version)
 
-	actions := []string{BRANCH, PULL_REQUEST, REMOVE_BRANCH, FETCH_REMOTE}
+	err := git.Is()
+
+	if err != nil {
+		log.Fatal("Git is not inited", err)
+	}
 
 	for {
-		action, err := ask.One(&actions, &chooseActionLabel)
+		action, err := ask.One(&actions, "Choose action:")
 
 		if err != nil {
-			log.Fatal(chooseActionLabel, err)
+			log.Fatal("Choose action:", err)
 		}
 
 		if action == BRANCH {
@@ -47,7 +48,7 @@ func main() {
 			remove.Run()
 		} else if action == FETCH_REMOTE {
 			command.Run("git", "remote", "prune", "origin")
-			utilities.FetchRemote()
+			git.FetchRemote()
 		}
 
 		fmt.Println()
